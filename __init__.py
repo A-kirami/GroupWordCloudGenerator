@@ -74,8 +74,7 @@ async def count_words(sp, n):
         else:
             w[i] += 1
     top = sorted(w.items(), key=lambda item: (-item[1], item[0]))
-    top_n = top[:n]
-    return top_n
+    return top[:n]
 
 
 async def filter_label(label_list: list) -> list:
@@ -152,19 +151,19 @@ async def draw_word_cloud(read_name,uid):
     # plt.imshow(wc)
     plt.axis("off")
     # plt.show()
-    out_img = PATH + '/wordcloud/' + str(uid) +'.png'
+    out_img = f'{PATH}/wordcloud/{str(uid)}.png'
     wc.to_file(out_img)
 
 
 async def get_review(group_id: int, member_id: int, review_type: str, target: str):
     time = datetime.now()
     year, month, day, hour, minute, second = time.strftime("%Y %m %d %H %M %S").split(" ")
-    if review_type == "year":
-        yearp, monthp, dayp, hourp, minutep, secondp = (time - relativedelta(years=1)).strftime("%Y %m %d %H %M %S").split(" ")
-        tag = "年内"
-    elif review_type == "month":
+    if review_type == "month":
         yearp, monthp, dayp, hourp, minutep, secondp = (time - relativedelta(months=1)).strftime("%Y %m %d %H %M %S").split(" ")
         tag = "月内"
+    elif review_type == "year":
+        yearp, monthp, dayp, hourp, minutep, secondp = (time - relativedelta(years=1)).strftime("%Y %m %d %H %M %S").split(" ")
+        tag = "年内"
     else:
         sv.logger.error('Error: review_type invalid!')
         return "Error: review_type invalid!"
@@ -192,7 +191,7 @@ async def get_review(group_id: int, member_id: int, review_type: str, target: st
                 AND time>'{yearp}-{monthp}-{dayp} {hourp}:{minutep}:{secondp}'"""
     res = await execute_sql(sql)
     times = res[0][0]
-    msg = f'''
+    return f'''
 记录时间：
 {yearp}-{monthp}-{dayp} {hourp}:{minutep}:{secondp}
 ---------至---------
@@ -201,4 +200,3 @@ async def get_review(group_id: int, member_id: int, review_type: str, target: st
 下面是{'你的' if target == 'member' else '本群的'}{tag}词云:
 [CQ:image,file=file:///{PATH}/wordcloud/{member_id}.png]
 '''.strip()
-    return msg

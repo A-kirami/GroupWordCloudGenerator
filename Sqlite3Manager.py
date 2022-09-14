@@ -14,24 +14,26 @@ class Sqlite3Manager:
         return cls.__instance
 
     def __init__(self):
-        if not self.__first_init:
-            self.path = os.getcwd()
-            self.__conn = sqlite3.connect(self.path + './hoshino/modules/GroupWordCloudGenerator/chatRecord.db')
-            cur = self.__conn.cursor()
-            cur.execute(
-                """CREATE TABLE IF NOT EXISTS `chatrecord` (
+        if self.__first_init:
+            raise ValueError("Sqlite3Manager already initialized!")
+        self.path = os.getcwd()
+        self.__conn = sqlite3.connect(
+            f'{self.path}./hoshino/modules/GroupWordCloudGenerator/chatRecord.db'
+        )
+
+        cur = self.__conn.cursor()
+        cur.execute(
+            """CREATE TABLE IF NOT EXISTS `chatrecord` (
                       `time` TEXT NOT NULL,
                       `groupId` INTEGER NOT NULL,
                       `memberId` INTEGER NOT NULL,
                       `content` TEXT NOT NULL,
                       `seg` text NOT NULL
                     )"""
-            )
-            self.__conn.commit()
+        )
+        self.__conn.commit()
 
-            Sqlite3Manager.__first_init = True
-        else:
-            raise ValueError("Sqlite3Manager already initialized!")
+        Sqlite3Manager.__first_init = True
 
     @classmethod
     def get_instance(cls):
